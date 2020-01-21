@@ -74,10 +74,15 @@ class BadCerts(Signature):
     }
 
     def on_complete(self):
-        for sig in self.get_results("static", {}).get("signature", []):
-            if sig["sha1"] in self.sha1_sigs:
-                self.mark(cert=sig, reference=self.sha1_sigs[sig["sha1"]])
-            elif sig["common_name"] in self.cn_sigs:
-                self.mark(cert=sig, reference=self.cn_sigs[sig["common_name"]])
+            for sig in self.get_results("static", {}).get("signature", []):
+                if sig["sha1"] in self.sha1_sigs:
+                    self.mark(cert=sig, reference=self.sha1_sigs[sig["sha1"]])
+                elif sig["subject"].get("commonName") in self.cn_sigs:
+                    self.mark(
+                        cert=sig,
+                        reference=self.cn_sigs[
+                            sig["subject"].get("commonName")
+                        ]
+                    )
 
-        return self.has_marks()
+            return self.has_marks()
